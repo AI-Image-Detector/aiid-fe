@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import axios from 'axios'
 
 function ImageUpload(){
   const [image, setImage] = useState(null)
-  const [imagePreview, setImagePreview] = useState('')
+  const [imagePreview, setImagePreview] = useState(null)
   const [predictedClass, setPredictedClass] = useState("")
   const [probability, setProbability] = useState(0)
   const [predictionTime, setPredictionTime] = useState(0)
@@ -12,8 +12,10 @@ function ImageUpload(){
     const file = e.target.files[0];
     setImage(file)
     console.log(image)
-    const URL_IMAGE = URL.createObjectURL(file)
-    setImagePreview(URL_IMAGE)
+    if(file !== null){
+      const URL_IMAGE = URL.createObjectURL(file)
+      setImagePreview(URL_IMAGE)
+    }
   };
 
   const handleUpload = async (e) => {
@@ -21,19 +23,11 @@ function ImageUpload(){
     const formData = new FormData()  //create new form object
     formData.append("image", image) // myImage is variable that API want
     console.log(image)
-    fetch("http://152.42.168.99/predict", {
-              method: "POST",
-              body: formData,
-          })
-              .then((response) => {
-                  return response.json()
-              })
-              .then((data) => {
-                  setPredictedClass(data.predicted_class)
-                  setProbability(data.probability)
-                  setPredictionTime(data.prediction_time)
-                  
-              });
+    axios.post('http://152.42.168.99/predict', formData).then(response => {
+      setPredictedClass(response.data.predicted_class)
+      setPredictionTime(response.data.prediction_time)
+      setProbability(response.data.probability)
+    })
 
   };
 
